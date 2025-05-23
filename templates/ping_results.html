@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Live Results</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background-color: #f4f4f4;
+      }
+      h1 {
+        font-size: 24px;
+        font-weight: bold;
+        margin: 20px 0;
+      }
+      /* Add CSS for the outer scrollable container */
+      .outer-scrollable {
+        max-height: 90vh; /* Adjust the height as needed to allow more content */
+        overflow-y: auto;
+      }
+      /* Remove max-height: none; and make it a large value */
+      .inner-scrollable {
+        height: 10000px; /* A large value to allow for plenty of content */
+        overflow-y: scroll;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%; /* 100% width to fill the container */
+      }
+      thead {
+        position: -webkit-sticky; /* For Safari */
+        position: sticky;
+        top: 0;
+        background-color: #f2f2f2; /* Sticky header background color */
+        z-index: 1;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      td.statistics {
+        white-space: pre-wrap;
+      }
+      button {
+        display: inline-block;
+        margin: 10px;
+        padding: 10px 20px;
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+      }
+      button:hover {
+        background-color: #0056b3;
+        border: 1px solid #0056b3;
+      }
+      #live-results-table>thead{
+        position: sticky;
+        z-index: 10;
+        top: 0;
+      }
+    </style>
+    <style id="reachable">
+      tr.reachable {
+        background-color: #74c576; /* Light green for reachable */
+      }
+    </style>
+    <style id="not-reachable">
+      tr.not-reachable {
+        background-color: #fc4a4a; /* Light red for not reachable */
+      }
+    </style>
+  </head>
+  <body>
+    <div style="display: flex; padding: 0px; align-items: center">
+      <div style="width: 20%">
+        <label for="filter">Filter:</label>
+        <select name="filter" id="FilterSelect" onchange="Filter()">
+          <option value="all">All</option>
+          <option value="reachable">Reachable</option>
+          <option value="not-reachable">Not-Reachable</option>
+        </select>
+      </div>
+      <h1 style="width: 60%">Live Ping Results</h1>
+    </div>
+
+    <!-- Add the outer scrollable container -->
+    <div class="outer-scrollable">
+      <!-- Add the inner scrollable container -->
+      <div class="inner-scrollable">
+        <table id="live-results-table"></table>
+      </div>
+    </div>
+    <script>
+      function sortTable(n) {
+        var table,
+          rows,
+          switching,
+          i,
+          x,
+          y,
+          shouldSwitch,
+          dir,
+          switchcount = 0;
+        table = document.getElementById("live-results-table");
+        switching = true;
+        dir = "asc"; // Set the sorting direction to ascending
+        while (switching) {
+          switching = false;
+          rows = table.rows;
+          for (i = 1; i < rows.length - 1; i++) {
+            shouldSwitch = false;
+            x = rows[i].getElementsByTagName("td")[n];
+            y = rows[i + 1].getElementsByTagName("td")[n];
+            if (dir == "asc") {
+              if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                shouldSwitch = true;
+                break;
+              }
+            } else if (dir == "desc") {
+              if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                shouldSwitch = true;
+                break;
+              }
+            }
+          }
+          if (shouldSwitch) {
+            rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+            switching = true;
+            switchcount++;
+          } else {
+            if (switchcount == 0 && dir == "asc") {
+              dir = "desc";
+              switching = true;
+            }
+          }
+        }
+      }
+
+      // Function to hide and show more , less data .
+      function hideAndShow(id) {
+        document.getElementById(id);
+
+        // Assuming parentElementId is the ID of the parent element
+        var ElementObject = document.getElementById(id);
+        var buttonElement = ElementObject.querySelector("button");
+
+        // Retrieve the content of the button
+        var buttonText = buttonElement.textContent || buttonElement.innerText;
+
+        if (buttonText == "Show more") {
+          var LessDataElement = ElementObject.querySelector(".less_data");
+          var MoreDataElement = ElementObject.querySelector(".more_data");
+          LessDataElement.setAttribute("style", "display:none");
+          MoreDataElement.setAttribute("style", "");
+          buttonElement.innerHTML = "Show less";
+        } else if (buttonText == "Show less") {
+          var LessDataElement = ElementObject.querySelector(".less_data");
+          var MoreDataElement = ElementObject.querySelector(".more_data");
+          LessDataElement.setAttribute("style", "");
+          MoreDataElement.setAttribute("style", "display:none");
+          buttonElement.innerHTML = "Show more";
+        }
+
+        // Log or use the buttonText as needed
+        // console.log(buttonText);
+      }
+
+      function Filter() {
+        var x = document.getElementById("FilterSelect").value;
+        console.log(x);
+        if (x == "reachable") {
+          document.getElementById('not-reachable').innerHTML = `tr.not-reachable { display:none }`;
+          document.getElementById('reachable').innerHTML = `tr.reachable { background-color: #74c576 }`;
+        } else if (x == "not-reachable") {
+          document.getElementById('reachable').innerHTML = `tr.reachable { display:none }`;
+          document.getElementById('not-reachable').innerHTML = `tr.not-reachable { background-color: #fc4a4a }`;
+        }
+        else if (x == 'all'){
+          document.getElementById('reachable').innerHTML = `tr.reachable { background-color: #74c576 }`;
+          document.getElementById('not-reachable').innerHTML = `tr.not-reachable { background-color: #fc4a4a }`;
+        }
+      }
+
+      // Function to update the table with live results
+      function updateLiveResults() {
+        fetch("/ping/update_live_data")
+          .then((response) => response.json()) // Assuming the response is in JSON format
+          .then((data) => {
+            var tr_data =
+              "<thead><tr><th>IP Address</th><th>Status</th><th>Last Ping Time</th><th>Statistics</th><th>More Info</th></tr></thead>";
+            var i = 1;
+            Object.keys(data).forEach((key) => {
+              console.log(data[key]);
+              if (data[key].status == "Reachable") {
+                class_name = "reachable";
+              } else {
+                class_name = "not-reachable";
+              }
+              tr_data += '<tr class="' + class_name + '" id="row' + i + '">';
+              tr_data += "<td>" + data[key].ip_address + "</td>";
+              tr_data += "<td>" + data[key].status + "</td>";
+              tr_data += "<td>" + data[key].last_ping_time + "</td>";
+              tr_data +=
+                "<td class='less_data'>" +
+                data[key].less_data.replace(/\n/g, "<br>") +
+                "</td>";
+              tr_data +=
+                "<td class='more_data' style='display:none'>" +
+                data[key].statistics.replace(/\r\n/g, "<br>") +
+                "</td>";
+              tr_data +=
+                `<td><button class="button" type="button" onclick="hideAndShow('row` +
+                i +
+                `')">Show more</td>`;
+              tr_data += "</tr>";
+              i += 1;
+            });
+            document.getElementById("live-results-table").innerHTML = tr_data;
+          });
+      }
+
+      // Call the update function every 60 seconds
+      setInterval(updateLiveResults, 60000);
+
+      // Initial update
+      updateLiveResults();
+    </script>
+  </body>
+</html>

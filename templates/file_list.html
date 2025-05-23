@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>File List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      width: 80%;
+      margin: 20px auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+    th {
+      background-color: #f4f4f4;
+      font-weight: bold;
+      color: #444;
+    }
+    td {
+      color: #333;
+    }
+    a {
+      text-decoration: none;
+      color: #0078d4;
+      transition: color 0.3s ease;
+    }
+    a:hover {
+      color: #005299;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Files in Directory: {{ directory }}</h1>
+    <table>
+      <thead>
+        <tr>
+          <th>File Name</th>
+          <th>Size</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for file in files %}
+        <tr>
+          <td><a href="/read_file/{{ directory }}/{{ file.file_name }}">{{ file.file_name }}</a></td>
+          <td>{{ file.size | filesizeformat }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</body>
+</html>

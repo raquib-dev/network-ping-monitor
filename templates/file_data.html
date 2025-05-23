@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Live Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        /* Add CSS for the outer scrollable container */
+        .outer-scrollable {
+            max-height: 90vh; /* Adjust the height as needed to allow more content */
+            overflow: auto;
+        }
+        /* Remove max-height: none; and make it a large value */
+        .inner-scrollable {
+            max-height: 10000px; /* A large value to allow for plenty of content */
+            overflow: auto;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%; /* 100% width to fill the container */
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            cursor: pointer; /* Add pointer cursor for sorting */
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        td.statistics {
+            white-space: pre-wrap;
+        }
+        button {
+        display: inline-block;
+        margin: 10px;
+        padding: 10px 20px;
+        text-decoration: none;
+        background-color: #007bff;
+        color: white;
+        border: 1px solid #007bff;
+        border-radius: 4px;
+        }
+        button:hover {
+            background-color: #0056b3;
+            border: 1px solid #0056b3;
+        }
+    </style>
+    <style id="reachable">
+        tr.reachable {
+          background-color: #74c576; /* Light green for reachable */
+        }
+      </style>
+      <style id="not-reachable">
+        tr.not-reachable {
+          background-color: #fc4a4a; /* Light red for not reachable */
+        }
+      </style>
+</head>
+<body>
+    <div style="display: flex; padding: 0px; align-items: center">
+        <div style="width: 20%">
+            <label for="filter">Filter:</label>
+            <select name="filter" id="FilterSelect" onchange="Filter()">
+            <option value="all">All</option>
+            <option value="reachable">Reachable</option>
+            <option value="not-reachable">Not-Reachable</option>
+            </select>
+        </div>
+        <h1 style="width: 60%">Ping Results</h1>
+    </div>
+    <!-- Add the outer scrollable container -->
+    <div class="outer-scrollable">
+        <!-- Add the inner scrollable container -->
+        <div class="inner-scrollable">
+            <table id="live-results-table">
+                <tr>
+                    <th onclick="sortTable(0)">IP Address</th>
+                    <th onclick="sortTable(1)">Status</th>
+                    <th onclick="sortTable(3)">Last Ping Time</th>
+                    <th>Statistics</th>
+                    <th>More Info</th>
+                </tr>
+                {% for result,value in file_data.items() %}
+                <tr id='row{{ loop.index }}' class="{{ 'reachable' if value['status'] == 'Reachable' else 'not-reachable' }}">
+                    <td>{{ value['ip_address'] }}</td>
+                    <td>{{ value['status'] }}</td>
+                    <td>{{ value['last_ping_time'] }}</td>
+                    <td class='less_data'>{{ value['less_data'] }}</td>
+                    <td class="more_data statistics" style="display:none" >{{ value['statistics'] }}</td>
+                    <td><button class="button" type="button" onclick="hideAndShow('row{{ loop.index }}')">Show more</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+    <script>
+        // Function to hide and show more , less data .
+        function hideAndShow(id) {
+            document.getElementById(id);
+
+            // Assuming parentElementId is the ID of the parent element
+            var ElementObject = document.getElementById(id);
+            var buttonElement = ElementObject.querySelector("button");
+
+            // Retrieve the content of the button
+            var buttonText = buttonElement.textContent || buttonElement.innerText;
+
+            if (buttonText == "Show more") {
+            var LessDataElement = ElementObject.querySelector('.less_data');
+            var MoreDataElement = ElementObject.querySelector('.more_data');
+            LessDataElement.setAttribute("style","display:none");
+            MoreDataElement.setAttribute("style","");
+            buttonElement.innerHTML = "Show less";
+            } else if (buttonText == "Show less") {
+            var LessDataElement = ElementObject.querySelector('.less_data');
+            var MoreDataElement = ElementObject.querySelector('.more_data');
+            LessDataElement.setAttribute("style","");
+            MoreDataElement.setAttribute("style","display:none");
+            buttonElement.innerHTML = "Show more";
+            }
+
+            // Log or use the buttonText as needed
+            // console.log(buttonText);
+        }
+        
+        function Filter() {
+            var x = document.getElementById("FilterSelect").value;
+            console.log(x);
+            if (x == "reachable") {
+            document.getElementById('not-reachable').innerHTML = `tr.not-reachable { display:none }`;
+            document.getElementById('reachable').innerHTML = `tr.reachable { background-color: #74c576 }`;
+            } else if (x == "not-reachable") {
+            document.getElementById('reachable').innerHTML = `tr.reachable { display:none }`;
+            document.getElementById('not-reachable').innerHTML = `tr.not-reachable { background-color: #fc4a4a }`;
+            }
+            else if (x == 'all'){
+            document.getElementById('reachable').innerHTML = `tr.reachable { background-color: #74c576 }`;
+            document.getElementById('not-reachable').innerHTML = `tr.not-reachable { background-color: #fc4a4a }`;
+            }
+        }
+
+        function sortTable(n) {
+            var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
+            table = document.getElementById("live-results-table");
+            switching = true;
+            dir = "asc"; // Set the sorting direction to ascending
+            while (switching) {
+                switching = false;
+                rows = table.rows;
+                for (i = 1; i < (rows.length - 1); i++) {
+                    shouldSwitch = false;
+                    x = rows[i].getElementsByTagName("td")[n];
+                    y = rows[i + 1].getElementsByTagName("td")[n];
+                    if (dir == "asc") {
+                        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    } else if (dir == "desc") {
+                        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+                            shouldSwitch = true;
+                            break;
+                        }
+                    }
+                }
+                if (shouldSwitch) {
+                    rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+                    switching = true;
+                    switchcount++;
+                } else {
+                    if (switchcount == 0 && dir == "asc") {
+                        dir = "desc";
+                        switching = true;
+                    }
+                }
+            }
+        }
+    </script>
+</body>
+</html>

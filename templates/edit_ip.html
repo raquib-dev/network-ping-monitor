@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit IP Addresses</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        textarea {
+            width: 80%;
+            height: 200px;
+            margin: 10px;
+        }
+        button {
+            padding: 10px;
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        /* Toast styles */
+        .toast {
+            visibility: hidden;
+            max-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 2px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            top: 30px; /* Updated position to top */
+            right: 30px; /* Updated position to right */
+            font-size: 17px;
+            transition: visibility 0s, opacity 0.5s linear;
+        }
+
+        /* Show the toast */
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+        }
+        @keyframes fadein {
+            from {bottom: 0; opacity: 0;}
+            to {bottom: 30px; opacity: 1;}
+        }
+        @keyframes fadeout {
+            from {bottom: 30px; opacity: 1;}
+            to {bottom: 0; opacity: 0;}
+        }
+    </style>
+</head>
+<body>
+    <h1>Edit IP Addresses</h1>
+    <form method="post" id="editForm">
+        <textarea name="edited_content">{{ ip_content }}</textarea><br>
+        <button type="button" onclick="saveData()">Save</button>
+    </form>
+
+    <!-- Toast notification container -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        function showToast(message, type) {
+            var toast = document.getElementById("toast");
+            toast.innerHTML = message;
+            toast.className = "toast show " + type;
+            setTimeout(function(){ toast.className = toast.className.replace("show", ""); }, 3000);
+        }
+
+        function saveData() {
+            // Get the form data
+            var formData = new FormData(document.getElementById("editForm"));
+            // console.log(formData)
+            // Simulate a POST request to save the data
+            fetch("/edit_ip", {
+                method: "POST",
+                body: formData,
+            })
+            .then(response => response.text())
+            .then(data => {
+                // Show success toast notification
+                showToast("Data saved successfully!", "success");
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                // Show error toast notification
+                showToast("Error saving data", "error");
+            });
+        }
+    </script>
+</body>
+</html>
