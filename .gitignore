@@ -1,0 +1,38 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Python packaging
+*.egg-info/
+dist/
+build/
+
+# Logs and database
+*.log
+*.sqlite3
+*.db
+*.pid
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS/system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Icon?
+
+# Local configs and data
+ip_addresses.txt
+Log/
