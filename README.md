@@ -72,6 +72,25 @@ python main.py
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 Home Page
+![Home Page](screenshots/home-page.png)
+
+### 📝 Edit IP Address
+![Edit IP](screenshots/edit-ip.png)
+
+### 📡 Live Results View
+![Live Results](screenshots/live-results.png)
+
+### 📁 Logs by Date and IP
+![Daywise Logs](screenshots/daywise-ipwise-logs.png)
+
+### 🕒 Historical Log Viewer
+![Historical Logs](screenshots/historical-log.png)
+
+---
+
 ## 🛠 Use Cases
 
 - Monitoring industrial tablet connectivity
